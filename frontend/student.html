@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DeepWork Analytics - Student Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-900 text-white font-sans min-h-screen flex flex-col">
+
+    <nav class="bg-gray-800 p-4 shadow-md flex justify-between items-center border-b border-gray-700 transition-all duration-300">
+        <h1 class="text-2xl font-bold text-blue-400 drop-shadow-md">DeepWork</h1>
+        <div class="space-x-4 flex items-center">
+            <button onclick="switchTab('dashboard')" class="hover:text-blue-300 transition">Dashboard</button>
+            <button onclick="switchTab('analytics')" class="hover:text-blue-300 transition text-purple-400 font-semibold">Analytics 📊</button>
+            <button onclick="switchTab('store')" class="hover:text-blue-300 transition">Rewards Store</button>
+            <button onclick="switchTab('leaderboard')" class="hover:text-blue-300 transition">Leaderboard 🏆</button>
+            
+            <div class="ml-6 pl-6 border-l border-gray-600 flex items-center">
+                <span class="text-yellow-400 font-bold mr-4">Points: <span id="nav-points">0</span></span>
+                <span id="nav-name" class="text-gray-300 mr-4 font-medium transition-all duration-300">Student</span>
+                <button onclick="logout()" class="text-red-400 hover:text-red-300 text-sm border border-red-400 px-3 py-1 rounded transition">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow flex justify-center p-10">
+        
+        <div id="view-dashboard" class="w-full max-w-5xl grid grid-cols-2 gap-10">
+            <div class="bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700">
+                <h2 class="text-xl font-semibold mb-2">Session Controls</h2>
+                <p class="mb-6 text-gray-400">Ready to focus, <span id="dash-name" class="font-bold transition-all duration-300 text-white"></span>?</p>
+                
+                <div class="mb-4">
+                    <label for="topic-select" class="block text-sm font-medium text-gray-400 mb-2">Select Study Topic</label>
+                    <select id="topic-select" class="w-full p-3 bg-gray-900 rounded border border-gray-600 text-white focus:outline-none focus:border-blue-500 transition">
+                        <option value="1">Data Structures & Algorithms</option>
+                        <option value="2">Operating Systems</option>
+                        <option value="3">Database Management Systems</option>
+                        <option value="4">Discrete Mathematics</option>
+                        <option value="5">Machine Learning</option>
+                    </select>
+                </div>
+
+                <div class="mb-6">
+                    <label for="session-goal" class="block text-sm font-medium text-gray-400 mb-2">Session Goal (Optional)</label>
+                    <input type="text" id="session-goal" placeholder="e.g., Master CPU Scheduling algorithms" class="w-full p-3 bg-gray-900 rounded border border-gray-600 text-white focus:outline-none focus:border-blue-500 transition">
+                </div>
+
+                <button id="btn-start" class="w-full bg-green-600 hover:bg-green-500 py-3 rounded font-bold mb-4 transition shadow-lg">Start Study Session</button>
+                <button id="btn-end" class="w-full bg-red-600 hover:bg-red-500 py-3 rounded font-bold transition shadow-lg hidden">End Session</button>
+            </div>
+
+            <div class="bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700">
+                <h2 class="text-xl font-semibold mb-6 text-green-400 flex items-center justify-between">
+                    Live Database Status <span id="sync-dot" class="h-3 w-3 bg-red-500 rounded-full animate-pulse"></span>
+                </h2>
+                <div class="space-y-4 text-lg">
+                    <div class="flex justify-between border-b border-gray-700 pb-2">
+                        <span>Session ID:</span> <span id="stat-id" class="font-bold text-gray-400">Not Started</span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-700 pb-2">
+                        <span>Focus Score:</span> <span id="stat-score" class="font-bold text-blue-300">100</span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-700 pb-2">
+                        <span>Productive Time:</span> <span id="stat-prod" class="font-bold text-green-300">0s</span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-700 pb-2">
+                        <span>Distracted Time:</span> <span id="stat-dist" class="font-bold text-red-400">0s</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-analytics" class="w-full max-w-6xl hidden space-y-8">
+            <div class="flex justify-between items-center">
+                <h2 class="text-3xl font-bold text-purple-400">Data Command Center 🧠</h2>
+                <p class="text-gray-400">Powered by advanced SQL aggregation.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg text-center">
+                    <h3 class="text-gray-400 text-sm uppercase tracking-wider mb-2">Most Focused Topic</h3>
+                    <div id="stat-top-subject" class="text-2xl font-bold text-blue-400 animate-pulse">Loading...</div>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg text-center">
+                    <h3 class="text-gray-400 text-sm uppercase tracking-wider mb-2">Peak Study Hour</h3>
+                    <div id="stat-peak-study" class="text-2xl font-bold text-green-400 animate-pulse">Loading...</div>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg text-center">
+                    <h3 class="text-gray-400 text-sm uppercase tracking-wider mb-2">Peak Distraction</h3>
+                    <div id="stat-peak-distract" class="text-2xl font-bold text-red-400 animate-pulse">Loading...</div>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg text-center">
+                    <h3 class="text-gray-400 text-sm uppercase tracking-wider mb-2">Total Focus (7 Days)</h3>
+                    <div id="stat-total-deepwork" class="text-2xl font-bold text-yellow-400 animate-pulse">Loading...</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg flex flex-col items-center">
+                    <h3 class="text-lg font-bold text-red-400 mb-4">Top Distractions ⚠️</h3>
+                    <div class="w-full max-w-xs"><canvas id="chart-kryptonite"></canvas></div>
+                </div>
+
+                <div class="md:col-span-2 bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg flex flex-col items-center">
+                    <h3 class="text-lg font-bold text-blue-400 mb-4">7-Day Focus Trend 📈</h3>
+                    <div class="w-full"><canvas id="chart-trend"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-store" class="w-full max-w-5xl hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-bold text-yellow-400">Rewards Store 🛒</h2>
+                
+                <div class="flex space-x-4 items-center">
+                    <button onclick="simulateConflict()" class="bg-red-600 hover:bg-red-500 px-4 py-2 rounded font-bold text-white shadow-lg transition">
+                        🚨 Simulate Double-Spend Conflict
+                    </button>
+                    <div class="bg-gray-800 border border-gray-700 px-4 py-2 rounded-lg text-yellow-400 font-bold shadow-lg">
+                        Wallet: <span id="store-wallet">0</span> pts
+                    </div>
+                </div>
+            </div>
+            
+            <p class="text-gray-400 mb-8">Spend your hard-earned focus points on exclusive perks!</p>
+            
+            <div id="store-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="text-gray-500 animate-pulse">Stocking the shelves...</div>
+            </div>
+        </div>
+
+        <div id="view-leaderboard" class="w-full max-w-5xl hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-bold text-yellow-400">Leaderboard 🏆</h2>
+                <div class="space-x-2 bg-gray-800 p-1 rounded-lg border border-gray-700">
+                    <button id="btn-global-board" class="bg-blue-600 px-4 py-2 rounded text-white font-bold transition shadow">Global</button>
+                    <button id="btn-group-board" class="bg-transparent hover:bg-gray-700 px-4 py-2 rounded text-gray-400 font-bold transition">My Tutorial Group</button>
+                </div>
+            </div>
+
+            <div class="bg-gray-800 rounded-xl shadow-lg border border-gray-700 overflow-hidden">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-900 border-b border-gray-700 text-gray-400 text-sm uppercase tracking-wider">
+                            <th class="p-4 font-medium w-24">Rank</th>
+                            <th class="p-4 font-medium">Student Name</th>
+                            <th class="p-4 font-medium text-right">Focus Points</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body" class="divide-y divide-gray-700">
+                        <tr><td colspan="3" class="p-8 text-center text-gray-400 animate-pulse">Click a tab to load rankings...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="./js/student.js"></script>
+</body>
+</html>
