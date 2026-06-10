@@ -451,3 +451,34 @@ async function loadAnalyticsDashboard() {
         console.error("Analytics Dashboard Error:", err);
     }
 }
+
+// ==========================================
+//  DYNAMIC STUDY DICTIONARY
+// ==========================================
+async function loadDynamicTopics() {
+    const topicSelect = document.getElementById('topic-select');
+    topicSelect.innerHTML = '<option value="">Loading official topics...</option>';
+
+    try {
+        const res = await fetch('http://localhost:3000/api/sessions/topics');
+        const result = await res.json();
+
+        if (result.success && result.data.length > 0) {
+            topicSelect.innerHTML = ''; // Clear the loading message
+            
+            result.data.forEach(topic => {
+                // Dynamically build the dropdown options!
+                topicSelect.innerHTML += `<option value="${topic.topic_id}">${topic.topic_name}</option>`;
+            });
+        } else {
+            topicSelect.innerHTML = '<option value="">No topics available</option>';
+            document.getElementById('btn-start').disabled = true; // Prevent starting if no topics exist
+        }
+    } catch (err) {
+        console.error("Failed to load topics:", err);
+        topicSelect.innerHTML = '<option value="">Error connecting to database</option>';
+    }
+}
+
+// Call this immediately when the student logs in!
+loadDynamicTopics();
