@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DeepWork - Admin Overlord</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white font-sans min-h-screen flex flex-col">
+
+    <nav class="bg-gray-900 p-4 shadow-md flex justify-between items-center border-b border-emerald-700">
+        <h1 class="text-2xl font-bold text-emerald-500 drop-shadow-md">DeepWork <span class="text-gray-400 text-lg">Admin</span></h1>
+        <div class="space-x-4 flex items-center">
+            <button onclick="switchTab('stats')" class="hover:text-emerald-300 transition text-emerald-400 font-semibold">System Analytics 📈</button>
+            <button onclick="switchTab('users')" class="hover:text-emerald-300 transition">User Management 👥</button>
+            <button onclick="switchTab('store')" class="hover:text-emerald-300 transition">Store Inventory 🛒</button>
+            <button onclick="switchTab('topics')" class="hover:text-emerald-300 transition">Study Topics 📚</button>
+            
+            <div class="ml-6 pl-6 border-l border-gray-600 flex items-center">
+                <span class="text-red-400 font-bold mr-4">God Mode</span>
+                <span id="admin-name" class="text-gray-300 mr-4 font-medium">Loading...</span>
+                <button onclick="logout()" class="text-red-400 hover:text-red-300 text-sm border border-red-400 px-3 py-1 rounded transition">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow flex justify-center p-10">
+        
+        <div id="view-stats" class="w-full max-w-6xl space-y-8">
+            <div class="flex justify-between items-center">
+                <h2 class="text-3xl font-bold text-emerald-400">Global Platform Health</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg text-center">
+                    <h3 class="text-gray-400 text-sm uppercase tracking-wider mb-2">Total Deep Work (Platform)</h3>
+                    <div id="sys-total-time" class="text-3xl font-bold text-blue-400 animate-pulse">--</div>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg text-center">
+                    <h3 class="text-gray-400 text-sm uppercase tracking-wider mb-2">Total Points Circulating</h3>
+                    <div id="sys-total-points" class="text-3xl font-bold text-yellow-400 animate-pulse">--</div>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg text-center">
+                    <h3 class="text-gray-400 text-sm uppercase tracking-wider mb-2">Most Productive Group</h3>
+                    <div id="sys-top-group" class="text-3xl font-bold text-emerald-400 animate-pulse">--</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-users" class="w-full max-w-6xl hidden space-y-6">
+            <div class="flex justify-between items-center">
+                <h2 class="text-3xl font-bold text-emerald-400">User Database</h2>
+                <button onclick="toggleUserForm()" class="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded font-bold text-white shadow-lg transition">+ Provision New User</button>
+            </div>
+            <div id="add-user-form" class="bg-gray-800 p-6 rounded-xl border border-emerald-700 shadow-lg hidden">
+                <form id="create-user-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><label class="block text-sm text-gray-400 mb-1">Full Name</label><input type="text" id="new-name" required class="w-full p-2 bg-gray-900 rounded border border-gray-600 text-white outline-none"></div>
+                    <div><label class="block text-sm text-gray-400 mb-1">Email</label><input type="email" id="new-email" required class="w-full p-2 bg-gray-900 rounded border border-gray-600 text-white outline-none"></div>
+                    <div><label class="block text-sm text-gray-400 mb-1">Tutorial Group ID</label><input type="number" id="new-tg" required min="1" class="w-full p-2 bg-gray-900 rounded border border-gray-600 text-white outline-none"></div>
+                    <div><label class="block text-sm text-gray-400 mb-1">Temp Password</label><input type="text" id="new-pass" required value="default123" class="w-full p-2 bg-gray-900 rounded border border-gray-600 text-white outline-none"></div>
+                    <div class="md:col-span-2 flex justify-end space-x-3 mt-2">
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded font-bold text-white shadow transition">Create Account</button>
+                    </div>
+                </form>
+            </div>
+            <div class="bg-gray-800 rounded-xl shadow-lg border border-gray-700 overflow-hidden">
+                <table class="w-full text-left border-collapse">
+                    <thead><tr class="bg-gray-900 border-b border-gray-700 text-gray-400 text-sm uppercase tracking-wider"><th class="p-4">ID</th><th class="p-4">Name</th><th class="p-4">Email</th><th class="p-4">Group</th><th class="p-4">Points</th></tr></thead>
+                    <tbody id="user-table-body" class="divide-y divide-gray-700"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="view-store" class="w-full max-w-6xl hidden space-y-6">
+            <div class="flex justify-between items-center">
+                <h2 class="text-3xl font-bold text-emerald-400">Store Inventory Manager</h2>
+                <button onclick="toggleStoreForm()" class="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded font-bold text-white shadow-lg transition">+ Add New Reward</button>
+            </div>
+            <div id="add-store-form" class="bg-gray-800 p-6 rounded-xl border border-emerald-700 shadow-lg hidden">
+                <form id="create-item-form" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="md:col-span-1"><label class="block text-sm text-gray-400 mb-1">Emoji Icon</label><input type="text" id="new-item-icon" required placeholder="🍕" class="w-full p-2 bg-gray-900 rounded border border-gray-600 text-white outline-none"></div>
+                    <div class="md:col-span-2"><label class="block text-sm text-gray-400 mb-1">Reward Name</label><input type="text" id="new-item-name" required class="w-full p-2 bg-gray-900 rounded border border-gray-600 text-white outline-none"></div>
+                    <div class="md:col-span-1"><label class="block text-sm text-gray-400 mb-1">Point Cost</label><input type="number" id="new-item-cost" required min="1" class="w-full p-2 bg-gray-900 rounded border border-gray-600 text-white outline-none"></div>
+                    <div class="md:col-span-4"><label class="block text-sm text-gray-400 mb-1">Description</label><input type="text" id="new-item-desc" required class="w-full p-2 bg-gray-900 rounded border border-gray-600 text-white outline-none"></div>
+                    <div class="md:col-span-4 flex justify-end space-x-3 mt-2">
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded font-bold text-white shadow transition">Publish Reward</button>
+                    </div>
+                </form>
+            </div>
+            <div id="admin-store-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </div>
+
+        <div id="view-topics" class="w-full max-w-4xl hidden space-y-6">
+            <h2 class="text-3xl font-bold text-emerald-400 mb-6">Study Dictionary Manager</h2>
+            
+            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg mb-6">
+                <h3 class="text-lg font-bold text-white mb-4">Add Official Study Topic</h3>
+                <form id="create-topic-form" class="flex space-x-4">
+                    <input type="text" id="new-topic-name" required placeholder="e.g. Computer Networks" class="flex-grow p-3 bg-gray-900 rounded border border-gray-600 text-white outline-none focus:border-emerald-500">
+                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 px-6 py-3 rounded font-bold text-white shadow transition">Add Topic</button>
+                </form>
+            </div>
+
+            <div class="bg-gray-800 rounded-xl shadow-lg border border-gray-700 overflow-hidden">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-900 border-b border-gray-700 text-gray-400 text-sm uppercase tracking-wider">
+                            <th class="p-4 w-24">Topic ID</th>
+                            <th class="p-4">Official Subject Name</th>
+                        </tr>
+                    </thead>
+                    <tbody id="topic-table-body" class="divide-y divide-gray-700">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="./js/admin.js"></script>
+</body>
+</html>
