@@ -50,3 +50,14 @@ exports.getActiveSession = async (req, res) => {
         res.status(500).json({ success: false, message: "Server Error" });
     }
 };
+
+// Fetch the dynamic study dictionary for the student UI
+exports.getStudyTopics = async (req, res) => {
+    try {
+        const [topics] = await db.query("SELECT topic_id, topic_name FROM Study_Topics ORDER BY topic_name ASC");
+        res.status(200).json({ success: true, data: topics });
+    } catch (err) {
+        console.error("Fetch Topics Error:", err);
+        res.status(500).json({ success: false, message: "Database Error" });
+    }
+};
