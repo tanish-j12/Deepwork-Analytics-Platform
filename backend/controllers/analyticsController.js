@@ -15,7 +15,7 @@ exports.getKryptoniteStats = async (req, res) => {
             JOIN Category_Keywords ck ON al.ck_id = ck.ck_id
             JOIN Website_Categories wc ON ck.wc_id = wc.wc_id
             JOIN Sessions s ON al.s_id = s.s_id
-            WHERE s.u_id = ? AND LOWER(wc.category_name) = 'distracting'
+            WHERE s.u_id = ? AND LOWER(wc.category_type) = 'distracting'
             GROUP BY ck.keyword
             ORDER BY total_seconds DESC
             LIMIT 5;
@@ -45,8 +45,16 @@ exports.getDashboardStats = async (req, res) => {
             [sevenDayTotalResult], 
             [trendResult]
         ] = await Promise.all([
-            // Query 1: Most Focused Subject
-            db.query(`SELECT topic_id, SUM(productive_time) as total_time FROM Sessions WHERE u_id = ? GROUP BY topic_id ORDER BY total_time DESC LIMIT 1`, [u_id]),
+            // Query 1: Most Focused Subject (UPDATED WITH INNER JOIN!)
+            db.query(`
+                SELECT st.topic_name, SUM(s.productive_time) as total_time 
+                FROM Sessions s
+                JOIN Study_Topics st ON s.topic_id = st.topic_id
+                WHERE s.u_id = ? 
+                GROUP BY st.topic_id 
+                ORDER BY total_time DESC 
+                LIMIT 1
+            `, [u_id]),
             
             // Query 2: Peak Study Hour
             db.query(`SELECT HOUR(start_time) as hour, SUM(productive_time) as total_time FROM Sessions WHERE u_id = ? GROUP BY HOUR(start_time) ORDER BY total_time DESC LIMIT 1`, [u_id]),
@@ -70,14 +78,11 @@ exports.getDashboardStats = async (req, res) => {
             return `${formattedHour} ${ampm}`;
         };
 
-        // Map for your Topics based on the HTML select options
-        const topicMap = {
-            1: "DSA", 2: "Operating Systems", 3: "DBMS", 4: "Discrete Math", 5: "Machine Learning"
-        };
-
         // Package all the data perfectly for the frontend
         const dashboardData = {
-            topSubject: topSubjectResult.length > 0 ? topicMap[topSubjectResult[0].topic_id] : "N/A",
+            // UPDATED: Now it pulls the topic_name directly from the database JOIN!
+            topSubject: topSubjectResult.length > 0 ? topSubjectResult[0].topic_name : "N/A",
+            
             peakStudyHour: peakStudyResult.length > 0 ? formatHour(peakStudyResult[0].hour) : "N/A",
             peakDistractHour: peakDistractResult.length > 0 ? formatHour(peakDistractResult[0].hour) : "N/A",
             totalDeepWork: sevenDayTotalResult[0].total_7d ? Math.round(sevenDayTotalResult[0].total_7d / 60) : 0, // Convert to minutes
