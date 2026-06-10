@@ -9,6 +9,7 @@ const trackerRoutes = require('./routes/trackerRoutes'); // <-- NEW
 const leaderboardRoutes = require('./routes/leaderboardRoutes');
 const storeRoutes = require('./routes/storeRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
 const PORT = 3000;
@@ -24,6 +25,7 @@ app.use('/api/tracker', trackerRoutes);  // <-- NEW
 app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/api/store', storeRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/admin', adminRoutes);
 // 4. Health Check
 app.get('/api/health', (req, res) => {
     res.json({ success: true, message: 'DeepWork Analytics API is running securely! 🚀' });
