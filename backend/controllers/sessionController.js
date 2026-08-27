@@ -54,7 +54,7 @@ exports.getActiveSession = async (req, res) => {
 // Fetch the dynamic study dictionary for the student UI
 exports.getStudyTopics = async (req, res) => {
     try {
-        const [topics] = await db.query("SELECT topic_id, topic_name FROM Study_Topics ORDER BY topic_name ASC");
+        const [topics] = await db.query("SELECT topic_id, topic_name FROM Topics ORDER BY topic_name ASC");
         res.status(200).json({ success: true, data: topics });
     } catch (err) {
         console.error("Fetch Topics Error:", err);
