@@ -120,7 +120,7 @@ exports.updateItemPrice = async (req, res) => {
 // ==========================================
 exports.getTopics = async (req, res) => {
     try {
-        const [topics] = await db.query("SELECT * FROM Study_Topics ORDER BY topic_id ASC");
+        const [topics] = await db.query("SELECT * FROM Topics ORDER BY topic_id ASC");
         res.status(200).json({ success: true, data: topics });
     } catch (err) {
         res.status(500).json({ success: false, message: "Database Error" });
@@ -130,7 +130,7 @@ exports.getTopics = async (req, res) => {
 exports.addTopic = async (req, res) => {
     const { topic_name } = req.body;
     try {
-        await db.query("INSERT INTO Study_Topics (topic_name) VALUES (?)", [topic_name]);
+        await db.query("INSERT INTO Topics (topic_name) VALUES (?)", [topic_name]);
         res.status(201).json({ success: true, message: "Topic added successfully!" });
     } catch (err) {
         if (err.code === 'ER_DUP_ENTRY') {
